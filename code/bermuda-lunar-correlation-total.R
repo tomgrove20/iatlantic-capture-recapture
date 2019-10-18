@@ -39,8 +39,6 @@ lunar_id <- lunar_id %>%
   drop_na(date)
 head(lunar_id)
 
-## GOOD TO HERE
-
 # STEP 4: now need to group by date sighted (ie number of humpbacks per day sighted)
 
 ggplot(data=lunar_id, aes(lunar_id$lunar_illumination)) + geom_histogram() + xlab("lunar illumination") 
@@ -50,10 +48,19 @@ ggplot(data=lunar_id, aes(lunar_id$lunar_phase)) + geom_histogram() + xlab("luna
 ggplot(data=lunar_id, aes(lunar_id$lunar_phase)) + geom_histogram() + coord_polar()+ xlab("Lunar phase")
   
 
-lunar_test <- lunar_id %>%
+
+# TEST: does the number of humpbacks sighted per day correlate with lunar illumination?
+
+lunar_days <- lunar_id %>%
   count(lunar_illumination)
 
-head(lunar_test)  
+head(lunar_days) 
+
+ggplot(data=lunar_days, aes(lunar_days$lunar_illumination)) + geom_histogram() + xlab("lunar illumination") + ylab("number of humpbacks per day")
+
+ggplot(data=lunar_days, aes(lunar_days$lunar_illumination)) + geom_area(stat="bin") + xlab("lunar illumination") + ylab("number of humpbacks per day")
+
+ggplot(data=lunar_days, aes(lunar_days$lunar_illumination, lunar_days$n)) + geom_point() + xlab("lunar illumination") + ylab("Number of humpbacks identified per day")
 
 
 arrange(lunar_id, date) #ensures that first sighting kept upon removing duplicated

@@ -49,12 +49,13 @@ head(lunar_id_last)
 write.csv(id, file="intermediate-products/hb_matches_bermuda_lunar_last.csv")
 
 
-
 # STEP 4: histogram of lunar cycle
 
 ggplot(data=lunar_id_last, aes(lunar_id_last$lunar_phase)) + geom_histogram() + xlab("lunar phase")
 
-ggplot(data=lunar_id_last, aes(lunar_id_last$lunar_illumination)) + geom_histogram() + xlab("lunar illumination") 
+ggplot(data=lunar_id_last, aes(lunar_id_last$lunar_illumination)) + geom_histogram() + xlab("lunar illumination")
+
+
 
 ## GOOD TO HERE
 
