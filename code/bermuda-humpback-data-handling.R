@@ -1,5 +1,5 @@
 #####################################
-### Exploring the ID dataset! #######
+### Cleaning the ID dataset! #######
 #########Tom Grove###################
 
 # AIM: produce a clean dataset of all sightings of identified humpbacks (including within-year duplicates) around Bermuda, up to 2018!
@@ -28,6 +28,8 @@ head(id)
 id$date <- gsub('_', '.', id$date)
 id$date <- as.Date.character(id$date, format = "%d.%m.%Y")
 head(id)
+
+
 
 # Now this contains all sightings of identified humpbacks (including within-year duplicates in Bermuda, up to 2018!)
 
