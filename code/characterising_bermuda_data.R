@@ -31,12 +31,16 @@ summary(id_cleaned)
 # A) Sightings total
 
 nrow(id_cleaned) #nrows = nsightings
+  
 
 # B) Sightings per hb.
 
 sightings_per_hb <- id_cleaned %>%
   count(id)
 summary(sightings_per_hb) # includes mean, median, min and max
+
+# Number of humpbacks 
+nrow(sightings_per_hb)
 
 
 # Histogram of number of sightings per hb (inc. within-year duplicates)
@@ -125,6 +129,56 @@ season_length <- aggregate(. ~ year, data=id_cleaned, FUN = function(i)max(i) - 
 season_length <- season_length %>%
     select(year, yearday)
 season_length
+
+## AIM: 1) split unique CRs back into years. 2) turn this 2d matrix into a 2d coloured grid, where colour in particular square (recapture year) represents number of resightings. Need to start with individual capture histories (ideally split up into year) and then adding unique capture histories.
+
+# take id_primaries from data-handling (id, event and detection). Called id x year-event x detection (dec-may).csv
+
+capture_history_split <- id_primaries %>%
+  # remove duplicates, which may occur when individuals are caught multiple times in an event
+  # For example, your event may be a year and an individual may be caught multiple times in a year.
+  distinct() %>%
+  # spread out data. The fill = 0 adds rows for combinations of id and event where individuals were not observerd
+  spread(event, detect, fill = 0)
+
+capture_history_year <- capture_history_split %>%
+  rename(a='1', b='2', c='3', d='4', e='5', f='6', g='7', h='8', i='9', j='10', k='11', l='12', m='13') %>%
+  mutate(year = ifelse(a==1, 2005,
+                       ifelse(a==0 & b==1, 2006, 
+                              ifelse(a==0 & b==0 & c==1, 2007, 
+                                     ifelse(a==0 & b==0 & c==0 & d==1, 2008, 
+                                            ifelse(a==0 & b==0 & c==0 & d==0 & e==1, 2009, 
+                                                   ifelse(a==0 & b==0 & c==0 & d==0 & e==0 & f==1, 2010, 
+                                                          ifelse(a==0 & b==0 & c==0 & d==0 & e==0 & f==0 & g==1, 2011, 
+                                                                 ifelse(a==0 & b==0 & c==0 & d==0 & e==0 & f==0 & g==0 & h==1, 2012, 
+                                                                        ifelse(a==0 & b==0 & c==0 & d==0 & e==0 & f==0 & g==0 & h==0 & i==1, 2013, 
+                                                                               ifelse(a==0 & b==0 & c==0 & d==0 & e==0 & f==0 & g==0 & h==0 & i==0 & j==1, 2014,
+                                                                                      ifelse(a==0 & b==0 & c==0 & d==0 & e==0 & f==0 & g==0 & h==0 & i==0 & j==0 & k==1, 2015, 
+                                                                                             ifelse(a==0 & b==0 & c==0 & d==0 & e==0 & f==0 & g==0 & h==0 & i==0 & j==0 & k==0 & l==1, 2016, 
+                                                                                                    ifelse(a==0 & b==0 & c==0 & d==0 & e==0 & f==0 & g==0 & h==0 & i==0 & j==0 & k==0 & l==0 & m==1, 2017,0 )))))))))))))) %>%
+  rename('2005'=a, '2006'=b, '2007'=c, '2008'=d, '2009'=e, '2010'=f, '2011'=g, '2012'=h, '2013'=i, '2014'=j, '2015'=k, '2016'=l, '2017'=m)
+
+capture_history_year <- capture_history_year %>%
+  select(-id) %>%
+  group_by(year) %>%
+  summarise_all(funs(sum))
+
+ch_year_long <- capture_history_year %>%
+  gather("year2","n", -year) %>%
+  mutate(frequency = ifelse(year >= year2, NA, n)) %>%
+  select(-n)
+
+ch_year_long$year <- as.character(ch_year_long$year)
+
+ggplot(data = ch_year_long, aes(x=year2, y=reorder(year, desc(year)), fill=frequency)) + 
+  geom_tile(color="gray")  + 
+  xlab("Year of resighting") + 
+  ylab("Year of first sighting") + 
+  scale_fill_gradient(low="white", high="blue", space = "Lab", na.value = "grey90")  + 
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 5, b = 0, l = 0)), axis.title.x = element_text(margin = margin(t = 5, r = 0, b = 0, l = 0)), axis.text.x = element_text(angle = 45, vjust=1, hjust=1), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.ticks = element_blank(), panel.background=element_rect(fill="transparent", color="transparent") )
+
+ggsave("intermediate-products/matrix-annual-cr-histories.png")
+
 
 ### APPENDICES
 ## Appendix 1
